@@ -4,13 +4,19 @@ import argparse
 import sys 
 from pathlib import Path
 
+from .scanner import Scanner
 from .analyzer import Analyzer
 
 def main() -> None:
     """Entry point for the dataview CLI"""
     path = get_cli_argument() 
 
-    analyzer = Analyzer(path)
+    path = get_cli_argument() 
+
+    scanner = Scanner(path)
+    files = scanner.scan()
+
+    analyzer = Analyzer(files)
     result = analyzer.analyze()
 
     print(result)
