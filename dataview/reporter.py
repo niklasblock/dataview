@@ -17,7 +17,8 @@ class Reporter:
             self._files_section() + "\n\n" +
             self._folders_section() + "\n\n" +
             self._types_section() + "\n\n" +
-            self._old_files_section()
+            self._old_files_section() + "\n\n" +
+            self._duplicates_section()
         )
 
     def _files_section(self) -> str:
@@ -59,7 +60,25 @@ class Reporter:
         for f in self.result["old_files"]:
             lines.append(f"| {f['name']} | {format_size(f['size'])} |")
         return "\n".join(lines)
-
+    
+    def _duplicates_section(self) -> str:
+        """Return markdown section for duplicate files"""
+        lines = ["## 🔁 Doppelte Dateien\n"]
+        
+        if not self.result["duplicates"]:
+            lines.append("Keine doppelten Dateien gefunden.")
+            return "\n".join(lines)
+        
+        lines.append("| Datei | Pfad | Größe |")
+        lines.append("|-------|------|-------|")
+        
+        for group in self.result["duplicates"]:
+            for f in group:
+                lines.append(f"| {f['name']} | {f['path'].parent} | {format_size(f['size'])} |")
+            lines.append("|-------|------|-------|")  # Trennlinie zwischen Gruppen
+        
+        return "\n".join(lines)
+    
 def format_size(bytes: int) -> str:
         """Convert bytes to human readable format"""
         for unit in ["B", "KB", "MB", "GB"]:

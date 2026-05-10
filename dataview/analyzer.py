@@ -2,6 +2,8 @@
 
 from datetime import datetime, timedelta
 from collections import defaultdict
+import hashlib
+from pathlib import Path
 
 class Analyzer: 
 
@@ -24,7 +26,8 @@ class Analyzer:
             "largest_files": self._top_largest_files(),
             "largest_folders": self._top_largest_folders(),
             "file_types": self._file_types(),
-            "old_files": self._old_files()
+            "old_files": self._old_files(),
+            "duplicates": self._find_duplicates()
         }
     
     def _top_largest_files(self, n: int = 10) -> list[dict]: 
@@ -60,3 +63,28 @@ class Analyzer:
         old = [f for f in self.files if f["modified"] < cutoff]
 
         return old 
+    
+    def _find_duplicates(self) -> list[dict]: 
+        """Files that are identical but have different names or locations."""
+
+        # Erst nach Größe gruppieren — nur gleich große Dateien hashen
+        size_groups = defaultdict(list)
+        for f in self.files:
+            size_groups[f["size"]].append(f)
+
+        hashes = defaultdict(list)
+        for size_group in size_groups.values():
+            if len(size_group) > 1:  # nur hashen wenn Größe gleich
+                for f in size_group:
+                    h = _hash_file(f["path"])
+                    hashes[h].append(f)
+
+        return [group for group in hashes.values() if len(group) > 1]
+
+def _hash_file(path: Path) -> str:
+    """Calculate MD5 hash of a file"""
+    md5 = hashlib.md5()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            md5.update(chunk)
+    return md5.hexdigest()
