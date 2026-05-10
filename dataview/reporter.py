@@ -18,7 +18,8 @@ class Reporter:
             self._folders_section() + "\n\n" +
             self._types_section() + "\n\n" +
             self._old_files_section() + "\n\n" +
-            self._duplicates_section()
+            self._duplicates_section() + "\n\n" +
+            self._categories_section()
         )
 
     def _files_section(self) -> str:
@@ -79,6 +80,18 @@ class Reporter:
         
         return "\n".join(lines)
     
+    def _categories_section(self) -> str:
+        """Return markdown section for file categories"""
+        lines = ["## 📂 Kategorien\n"]
+        lines.append("| Kategorie | Anzahl | Größe |")
+        lines.append("|-----------|--------|-------|")
+        
+        for category, data in self.result["categories"].items():
+            if data["count"] > 0:  # nur Kategorien mit Dateien anzeigen
+                lines.append(f"| {category} | {data['count']} | {format_size(data['size'])} |")
+        
+        return "\n".join(lines)
+
 def format_size(bytes: int) -> str:
         """Convert bytes to human readable format"""
         for unit in ["B", "KB", "MB", "GB"]:

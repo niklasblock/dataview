@@ -5,6 +5,15 @@ from collections import defaultdict
 import hashlib
 from pathlib import Path
 
+CATEGORIES = {
+    "Dokumente": [".pdf", ".docx", ".doc", ".xlsx", ".xls", ".pptx", ".txt", ".md"],
+    "Bilder":    [".jpg", ".jpeg", ".png", ".gif", ".svg", ".bmp", ".webp", ".ico"],
+    "Videos":    [".mp4", ".mov", ".avi", ".mkv", ".wmv"],
+    "Audio":     [".mp3", ".wav", ".aac", ".flac", ".m4a"],
+    "Code":      [".py", ".js", ".ts", ".html", ".css", ".json", ".yaml", ".sql"],
+    "Archive":   [".zip", ".tar", ".gz", ".dmg", ".pkg", ".rar"],
+    "Sonstiges": []
+}
 class Analyzer: 
 
     def __init__(self, files: list[dict]) -> None: #bekommt Scanner-Output
@@ -27,7 +36,8 @@ class Analyzer:
             "largest_folders": self._top_largest_folders(),
             "file_types": self._file_types(),
             "old_files": self._old_files(),
-            "duplicates": self._find_duplicates()
+            "duplicates": self._find_duplicates(), 
+            "categories": self._categorize_files()
         }
     
     def _top_largest_files(self, n: int = 10) -> list[dict]: 
@@ -80,6 +90,26 @@ class Analyzer:
                     hashes[h].append(f)
 
         return [group for group in hashes.values() if len(group) > 1]
+    
+    def _categorize_files(self) -> dict[str, dict]:
+        """Categorize files by type"""
+        categories = {cat: {"count": 0, "size": 0, "files": []} for cat in CATEGORIES}
+        
+        for f in self.files:
+            placed = False
+            for category, extensions in CATEGORIES.items():
+                if f["suffix"].lower() in extensions:
+                    categories[category]["files"].append(f)
+                    categories[category]["count"] += 1
+                    categories[category]["size"] += f["size"]
+                    placed = True
+                    break
+            if not placed:
+                categories["Sonstiges"]["files"].append(f)
+                categories["Sonstiges"]["count"] += 1
+                categories["Sonstiges"]["size"] += f["size"]
+        
+        return categories
 
 def _hash_file(path: Path) -> str:
     """Calculate MD5 hash of a file"""
