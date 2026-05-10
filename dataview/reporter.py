@@ -25,6 +25,11 @@ class Reporter:
     def _files_section(self) -> str:
         """"""
         lines = ["## 📁 Top 10 größte Dateien\n"]
+
+        if not self.result["largest_files"]: 
+            lines.append("Keine großen Dateien gefunden.")
+            return "\n".join(lines)
+
         lines.append("| Datei | Größe |")
         lines.append("|-------|-------|")
         for f in self.result["largest_files"]:
@@ -35,6 +40,11 @@ class Reporter:
     def _folders_section(self) -> str: 
         """"""
         lines = ["## 📂 Top 10 größte Ordner\n"]
+
+        if not self.result["largest_folders"]: 
+            lines.append("Keine großen Ordner gefunden.")
+            return "\n".join(lines)
+
         lines.append("| Ordner | Größe |")
         lines.append("|-------|-------|")
         for f in self.result["largest_folders"]:
@@ -44,6 +54,11 @@ class Reporter:
     def _types_section(self) -> str: 
         """"""
         lines = ["## 📋 Dateitypen\n"]
+
+        if not self.result["file_types"]: 
+            lines.append("Keine Dateiendungen gefunden.")
+            return "\n".join(lines)
+
         lines.append("| Typ | Anzahl |")
         lines.append("|-------|-------|")
         for suffix, count in self.result["file_types"].items():
@@ -56,6 +71,11 @@ class Reporter:
     def  _old_files_section(self) -> str: 
         """"""
         lines = ["## ⚠️ Alte Dateien (> 2 Jahre)\n"]
+
+        if not self.result["old_files"]:
+            lines.append("Keine alten Dateien gefunden.")
+            return "\n".join(lines)
+
         lines.append("| Datei | Größe |")
         lines.append("|-------|-------|")
         for f in self.result["old_files"]:
@@ -83,6 +103,11 @@ class Reporter:
     def _categories_section(self) -> str:
         """Return markdown section for file categories"""
         lines = ["## 📂 Kategorien\n"]
+
+        if not self.result["categories"]:
+            lines.append("Keine Kategorien gefunden.")
+            return "\n".join(lines)
+
         lines.append("| Kategorie | Anzahl | Größe |")
         lines.append("|-----------|--------|-------|")
         
