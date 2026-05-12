@@ -227,3 +227,6 @@ icon.iconset/
 
 # Programm Output 
 report.md
+
+#VSCode Tests
+.vscode/ 
