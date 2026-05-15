@@ -14,6 +14,15 @@ CATEGORIES = {
     "Archive":   [".zip", ".tar", ".gz", ".dmg", ".pkg", ".rar"],
     "Sonstiges": []
 }
+
+def _hash_file(path: Path) -> str:
+    """Calculate MD5 hash of a file"""
+    md5 = hashlib.md5()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            md5.update(chunk)
+    return md5.hexdigest()
+
 class Analyzer: 
 
     def __init__(self, files: list[dict]) -> None: #bekommt Scanner-Output
@@ -37,7 +46,8 @@ class Analyzer:
             "file_types": self._file_types(),
             "old_files": self._old_files(),
             "duplicates": self._find_duplicates(), 
-            "categories": self._categorize_files()
+            "categories": self._categorize_files(), 
+            "empty_files": self._find_empty_files() 
         }
     
     def _top_largest_files(self, n: int = 10) -> list[dict]: 
@@ -110,11 +120,10 @@ class Analyzer:
                 categories["Sonstiges"]["size"] += f["size"]
         
         return categories
+    
+    def _find_empty_files(self) -> list[dict]: 
+        """Find empty files"""
 
-def _hash_file(path: Path) -> str:
-    """Calculate MD5 hash of a file"""
-    md5 = hashlib.md5()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            md5.update(chunk)
-    return md5.hexdigest()
+        empty_files = [f for f in self.files if f["size"] == 0]
+
+        return empty_files

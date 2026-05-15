@@ -1,4 +1,12 @@
 
+def format_size(bytes: int) -> str:
+        """Convert bytes to human readable format"""
+        for unit in ["B", "KB", "MB", "GB"]:
+            if bytes < 1024:
+                return f"{bytes:.1f} {unit}"
+            bytes /= 1024
+        return f"{bytes:.1f} TB"
+
 class Reporter: 
 
     def __init__(self, result: dict) -> None:
@@ -19,7 +27,8 @@ class Reporter:
             self._types_section() + "\n\n" +
             self._old_files_section() + "\n\n" +
             self._duplicates_section() + "\n\n" +
-            self._categories_section()
+            self._categories_section() + "\n\n" +
+            self._empty_files_section()
         )
 
     def _files_section(self) -> str:
@@ -117,10 +126,20 @@ class Reporter:
         
         return "\n".join(lines)
 
-def format_size(bytes: int) -> str:
-        """Convert bytes to human readable format"""
-        for unit in ["B", "KB", "MB", "GB"]:
-            if bytes < 1024:
-                return f"{bytes:.1f} {unit}"
-            bytes /= 1024
-        return f"{bytes:.1f} TB"
+    def _empty_files_section(self) -> str: 
+        """Return markdown section for empty files"""
+
+        lines = ["## 📂 Leere Dateien\n"]
+
+        if not self.result["empty_files"]:
+            lines.append("Keine leeren Dateien gefunden.")
+            return "\n".join(lines)
+        
+        lines.append("| Datei | Pfad |")
+        lines.append("|-------|------|")
+
+        for f in self.result["empty_files"]:
+            lines.append(f"| {f['name']} | {f['path'].parent} |")
+            lines.append("|-------|------|")  # Trennlinie zwischen Gruppen
+        
+        return "\n".join(lines)
